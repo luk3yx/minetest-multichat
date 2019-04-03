@@ -52,10 +52,14 @@ multichat.prefixo = function(name)
 end
 
 -- Enviar mensagem para jogador
+local old_clients = {}
 local enviar_msg = function(name, msg, falante)
 	local player = minetest.get_player_by_name(name)
 	if player == nil then return end
 	local status = player:get_attribute("multichat_status")
+
+	-- Não envie mensagens duplicadas para jogos mais antigos
+	if name == falante and old_clients[name] then return end
 
 	-- Verifica se o jogador está no bate-papo público
 	if status == nil or status == "pub" then
@@ -169,7 +173,18 @@ else
 	minetest.register_on_chat_message(on_chat_message)
 end
 
+-- Detectar o Minetest 0.4.15 e versões mais antigas.
+minetest.register_on_joinplayer(function(player)
+	local name = player:get_player_name()
+	local info = minetest.get_player_information(name)
+	if info.protocol_version < 29 then
+		old_clients[name] = true
+	end
+end)
+
 -- Verificador de jogadores offline para remover grupos
 minetest.register_on_leaveplayer(function(player)
-	multichat.grupos[player:get_player_name()] = nil
+	local name = player:get_player_name()
+	multichat.grupos[name] = nil
+	old_clients[name] = nil
 end)

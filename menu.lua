@@ -210,6 +210,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			-- Adiciona jogador
 			local sl = tonumber(multichat.online[name].sl_tb_online)
 			local grupo = multichat.online[name].tb_online[sl]
+			if not multichat.grupos[name] then multichat.grupos[name] = {} end
 			multichat.grupos[name][grupo] = true
 
 			-- Atualiza menu do grupo
